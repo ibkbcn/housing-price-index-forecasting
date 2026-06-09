@@ -4,7 +4,7 @@ A comparison of forecasting models on the Housing Price Index (HPI) for new-buil
 
 ## About the data
 
-The data is the HPI published by the Spanish General Council of Notaries, based on actual public deeds. I keep only new-build homes in Catalonia, at a quarterly frequency, covering 72 observations from 2007 Q1 to 2024 Q4 (2007 = base year). The series is split 80/20 between training (58) and test (14).
+The data is the HPI published by the Spanish General Council of Notaries, based on actual public deeds. I keep only new-build homes in Catalonia, at a quarterly frequency, covering 72 observations from 2007 Q1 to 2024 Q4. The index is rebased to 2007 (=100). The series is split 80/20 between training (58) and test (14).
 
 The series shows two clear cycles: the 2008 crisis drop and the recovery that followed. There's no strong seasonality, and the Dickey-Fuller test confirms the series is non-stationary (p-value > 0.05).
 
