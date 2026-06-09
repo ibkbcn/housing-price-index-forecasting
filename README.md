@@ -27,7 +27,7 @@ ARIMA(0,2,1) came out the most accurate. Holt and ETS landed very close together
 
 ## Takeaway
 
-The interesting part is that the simplest model won. In a real-world setting I'd go with ARIMA, not just because it's more accurate but because it's far cheaper to train and maintain than XGBoost. More data doesn't always call for more complex models.
+The interesting part is that the simplest model won. In a real-world setting I'd go with ARIMA, not just because it's more accurate but because it's far cheaper to train and maintain than XGBoost. 
 
 ## Stack
 
