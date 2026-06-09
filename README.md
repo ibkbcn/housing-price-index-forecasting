@@ -31,6 +31,6 @@ The interesting part is that the simplest model won. In a real-world setting I'd
 
 ## Stack
 
-Python · R · ARIMA · ETS · XGBoost · pandas
+R · ARIMA · ETS · XGBoost 
 
 *Forecasting course project. MSc in Data Science, La Salle - URL (2025). With Marc Fort.*
