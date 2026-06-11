@@ -1,36 +1,81 @@
-# Housing Price Index Forecasting
+# Forecasting the Housing Price Index in Catalonia
 
-A comparison of forecasting models on the Housing Price Index (HPI) for new-build homes in Catalonia. The goal was to take a real time series and see which model predicts its evolution best, from classic methods to machine learning.
+![R](https://img.shields.io/badge/R-4.x-276DC3?logo=r&logoColor=white)
+![Models](https://img.shields.io/badge/models-Holt%20%C2%B7%20ARIMA%20%C2%B7%20ETS%20%C2%B7%20XGBoost-blue)
+![Data](https://img.shields.io/badge/data-INE%20(Spain)-success)
 
-## About the data
+Time-series forecasting of the **Housing Price Index (IPV) for new housing in Catalonia**, benchmarking classical statistical models against machine learning over 18 years of quarterly data (2007-2024): a series that spans the 2008 crash, the long recovery and the post-pandemic boom.
 
-The data is the HPI published by the Spanish General Council of Notaries, based on actual public deeds. I keep only new-build homes in Catalonia, at a quarterly frequency, covering 72 observations from 2007 Q1 to 2024 Q4. The index is rebased to 2007 (=100). The series is split 80/20 between training (58) and test (14).
+> Final project for *Time Series & Forecasting*, MSc in Data Science, La Salle (Ramon Llull University), 2025.
+> **Authors:** Ivan Betriu Kahlenberg · Marc Fort Garcia
 
-The series shows two clear cycles: the 2008 crisis drop and the recovery that followed. There's no strong seasonality, and the Dickey-Fuller test confirms the series is non-stationary (p-value > 0.05).
+## The question
 
-## The models
+Given 14.5 years of history, how accurately can each family of models forecast housing prices **14 quarters (3.5 years) ahead**? The series is a demanding test bench: two opposing cycles, a strong trend and no marked seasonality.
 
-- **Deterministic:** linear trend and Holt's exponential smoothing
-- **Stochastic:** ARIMA (via `auto.arima`) and ETS
-- **Machine learning:** XGBoost, building a lag matrix (n=4) to give it the temporal context it lacks on its own
+![Historical IPV series](figures/01_series_ipv.png)
+
+*Quarterly IPV for new housing in Catalonia (2015 = 100). The shaded band marks the 14 quarters the models must predict.*
+
+## Data
+
+| | |
+|---|---|
+| **Source** | [INE, Housing Price Index (IPV), base 2015](https://www.ine.es/jaxiT3/Tabla.htm?t=25171), built from notarial deeds of actual transactions |
+| **Scope** | New housing · Catalonia · index values (2015 = 100) |
+| **Frequency** | Quarterly, 2007Q1 to 2024Q4 (72 observations) |
+| **Split** | Train: 58 obs (2007Q1-2021Q2) · Test: 14 obs (2021Q3-2024Q4), an 80/20 split |
+
+The exact dataset used (~5 KB) is included in [`data/vivienda.csv`](data/vivienda.csv), extracted from the official INE export, so the whole project reproduces offline. The full INE download is also quarterly but mixes every region, three housing segments and variation rates; see [`data/README.md`](data/README.md) for the data dictionary and the exact filter.
+
+## Methodology
+
+The Augmented Dickey-Fuller test confirms the series is non-stationary (p = 0.91), guiding model choice. All models are trained on the same 58 quarters and evaluated on the same 14 held-out quarters:
+
+1. **Holt linear exponential smoothing**: deterministic benchmark for trended, non-seasonal series.
+2. **ARIMA**: `auto.arima()` selects ARIMA(0,2,1).
+3. **ETS**: state-space exponential smoothing; selects ETS(A,A,N).
+4. **XGBoost**: 4 lagged features, recursive multi-step forecasting.
 
 ## Results
 
-| Model    | RMSE  | MAE   | MSE     |
-|----------|-------|-------|---------|
-| Holt     | 14.69 | 12.19 | 215.72  |
-| ARIMA    | 12.24 | 10.03 | 149.72  |
-| ETS      | 14.69 | 12.19 | 215.72  |
-| XGBoost  | 44.41 | 41.34 | 1972.46 |
+| Model | RMSE | MAE | MSE |
+|---|---:|---:|---:|
+| **ARIMA (0,2,1)** | **12.24** | **10.03** | **149.72** |
+| ETS (A,A,N) | 14.69 | 12.19 | 215.72 |
+| Holt linear | 16.28 | 14.08 | 264.89 |
+| XGBoost (4 lags) | 44.41 | 41.34 | 1972.46 |
 
-ARIMA(0,2,1) came out the most accurate. Holt and ETS landed very close together, and XGBoost fell clearly behind: with so little data, it had no room to learn.
+*Holt metrics as reported in the project report and slides. Note that `holt()` in the published notebook fits the same underlying model as ETS(A,A,N), so running the notebook reproduces the ETS figures for the Holt call.*
 
-## Takeaway
+| **ARIMA (0,2,1), best** | **XGBoost, worst** |
+|---|---|
+| ![ARIMA forecast](figures/03_forecast_arima.png) | ![XGBoost forecast](figures/05_forecast_xgboost.png) |
 
-The interesting part is that the simplest model won. In a real-world setting I'd go with ARIMA, not just because it's more accurate but because it's far cheaper to train and maintain than XGBoost. 
+*Both charts are exported straight from the notebook. The Holt and ETS forecast charts are in [`figures/`](figures).*
 
-## Stack
+## Key takeaways
 
-Python · R · ARIMA · ETS · XGBoost · pandas
+- **ARIMA(0,2,1) wins** across every metric, tracking the post-2021 acceleration most closely.
+- **ETS comes second, with Holt close behind**: both project the trend upward but undershoot the post-2021 acceleration.
+- **XGBoost fails by design, not by tuning**: tree-based models cannot extrapolate beyond the range seen in training, so recursive forecasts flatten out while real prices kept climbing. A textbook illustration of why ML is not automatically better for small, strongly-trended series.
+- In a real use case the simpler statistical models would be preferred: better accuracy *and* lower computational cost.
 
-*Forecasting course project. MSc in Data Science, La Salle - URL (2025). With Marc Fort.*
+## Repository structure
+
+```
+├── data/
+│   ├── vivienda.csv          # IPV new housing, Catalonia (INE), exact data used
+│   └── README.md             # data dictionary & source
+├── notebooks/
+│   └── Proyecto_Final_TS.ipynb   # full analysis (R kernel)
+├── figures/                  # exported plots
+├── reports/
+│   ├── report.pdf            # written report (Spanish)
+│   └── slides.pptx           # presentation (Spanish)
+└── README.md
+```
+
+## Reproduce it
+
+R >= 4.0. The first notebook cell installs any missing packages. Open `notebooks/Proyecto_Final_TS.ipynb` with the Jupyter R kernel (IRkernel), or paste the cells into RStudio and run top to bottom.
