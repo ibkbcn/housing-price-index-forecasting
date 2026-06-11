@@ -23,7 +23,7 @@ Given 14.5 years of history, how accurately can each family of models forecast h
 | **Frequency** | Quarterly, 2007Q1 to 2024Q4 (72 observations) |
 | **Split** | Train: 58 obs (2007Q1-2021Q2) · Test: 14 obs (2021Q3-2024Q4), an 80/20 split |
 
-The exact dataset used (~5 KB) is included in [`data/vivienda.csv`](data/vivienda.csv), extracted from the official INE export, so the whole project reproduces offline. The full INE download is also quarterly but mixes every region, three housing segments and variation rates; see [`data/README.md`](data/README.md) for the data dictionary and the exact filter.
+The exact dataset used is included in [`data/vivienda.csv`](data/vivienda.csv), extracted from the official INE export. The full INE download is also quarterly but mixes every region, three housing segments and variation rates; see [`data/README.md`](data/README.md) for the data dictionary and the exact filter.
 
 ## Methodology
 
